@@ -198,7 +198,7 @@ relerr
 **Prompt (3–4 sentences):** Which variable had the largest relative error at your chosen `n_samp`?  
 Give a scientific reason why some variables are harder to estimate from a small sample.
 
-> The CO2 flux has the largest relative error at n = 200. This variable may be harder to estimate from a small sample because it does not match the 30-minute resolution and diurnal cycle that CO2 has. 
+> The CO2 flux has the largest relative error at n = 200. This variable may be harder to estimate from a small sample because it may not align with the diurnal cycle that CO2 has. 
 
 ---
 
@@ -276,7 +276,7 @@ p_relerr
 **Prompt (3–4 sentences):** Describe the pattern. Is improvement from n=25→100 larger than 300→1000?  
 Why does accuracy show “diminishing returns” as n increases?
 
-> *Write your answer here.*
+> The first pattern I notice is as n increases, the median and the 90th percentile decrease. There also seems to be an larger improvement from 300 to 1000 compared to 25 to 100. Accuracy shows "diminishing returns", as the sample size increases because a larger sample has a greater variabiility which can decrease the realtive error. 
 
 ---
 
@@ -341,14 +341,14 @@ tibble(mean_est = means) %>%
     x = paste0("Sample mean of ", target_var),
     y = "Count",
     title = "Sampling distribution of the mean",
-    subtitle = paste0("n = ", n_samp, "; reps = ", reps, " (dashed = population mean)")
+    subtitle = paste0("n = 1000", "; reps = 200", " (dashed = population mean)")
   )
 ```
 
 **Prompt (3–5 sentences):** How close were `se_theory` and `se_simulated`?  
 What changes if you increase `n_samp` vs increase `reps`?
 
-> *Write your answer here.*
+> The se_theory (.26) and se_simulated (.0082) at n = 1000, were not very close to one another. When I increased n_samp, the se_theory and se_simulated values were even farther away than before. After increasing the reps, the se_theory and se_simulated were about the same as the first time. 
 
 ---
 
@@ -409,7 +409,7 @@ ggplot(aes(boot_means)) + geom_histogram(bins = 10, alpha = 0.85) +
 **Prompt (4–6 sentences):** Compare the bootstrap distribution to the sampling distribution from Part III.  
 What is the bootstrap trying to approximate? When is bootstrap especially useful in EAES?
 
-> *Write your answer here.*
+> When comparing the bootstrap and sampling distribution are both relatively normal distributions. However the bootstrap seems to have a slight left skew commpared to the sampling distribution. The bootstrap is trying to approximate the true sampling distribution of the sample taken from the CO2 flux data. Bootstrapping is especially useful in EaES because most of the time you only have one study available, therefore bootstrapping can help simulate the distribution with limited information. 
 
 ---
 
@@ -494,7 +494,7 @@ tibble(boot_mean = boot_means_random) %>%
 **Prompt (3–4 sentences):** Is the bootstrap distribution centered near the population mean?  
 What does the bootstrap SD represent here?
 
-> *Write your answer here.*
+> The bootstrap distribution is not directly centered on the population mean, but it is slightly to the right of it centered more on the sample mean. THe bootstrap SD represents the level of uncertainty of the population mean based on the bootstrap sampling and mean. 
 
 ---
 
@@ -565,7 +565,7 @@ tibble(boot_mean = boot_means_summer) %>%
 Explain the difference between **precision** and **accuracy** in this example.  
 What *kind* of error is summer-only sampling introducing?
 
-> *Write your answer here.*
+> The bootstrap distribution appears normal and has a very small spread despite being far from the population mean. In this example, the precision comes from the bootstrap distrubtion appearing normal and having a high level of confidence. However, because it is so far from the population mean, this distrubtion is not very accurate. This seems reasonable since it is only focusing on one season instead of the whole year. Using just the summer months does not represent the variabiility that comes from the other seasons as well, making this not a good representation of the whole population. 
 
 ---
 
@@ -632,7 +632,7 @@ tibble(boot_mean = boot_means_strat) %>%
 Which sampling design is most accurate for the annual mean? Which looks most precise?  
 What does this teach you about bootstrap and study design?
 
-> *Write your answer here.*
+> The random and stratified distributions were the most similar in their center and spread compared to the summer-only distribution. These two were centered around the same value but the stratified distribution had more spread compared to the random distribution. The summer-only distribution was very narrow with a small spread and a lower sample mean, ultimately shifting the center more left. The most accurate sampling design was the stratified design because it was the closest to the population mean. I would also say that this design is also looks the most precise when comparing its shape to the original sampling distribution. This has taught me that just as with sampling, the design can make a distribution more accurate if chosen correctly based on the known information. 
 
 ---
 
