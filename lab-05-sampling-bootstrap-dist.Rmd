@@ -198,7 +198,7 @@ relerr
 **Prompt (3–4 sentences):** Which variable had the largest relative error at your chosen `n_samp`?  
 Give a scientific reason why some variables are harder to estimate from a small sample.
 
-> *Write your answer here.*
+> The CO2 flux has the largest relative error at n = 200. This variable may be harder to estimate from a small sample because it does not match the 30-minute resolution and diurnal cycle that CO2 has. 
 
 ---
 
@@ -209,10 +209,10 @@ We will focus on **one variable** and simulate many repeated studies. The next c
 ```{r relerr_by_n, echo=TRUE, eval=FALSE}
 set.seed(480)
 
-n_grid <- c(___, ___, ___, ___)   # e.g., c(25, 100, 300, 1000)
-reps <- ___                        # e.g., 500 or 1000
+n_grid <- c(25, 100, 300, 1000)   # e.g., c(25, 100, 300, 1000)
+reps <- 1000                        # e.g., 500 or 1000
 
-target_var <- "___"                # e.g., "fch4" or "fc"
+target_var <- "fc"                # e.g., "fch4" or "fc"
 
 # Pull the population vector (remove missing values once, up front)
 x_pop <- df[[target_var]]
@@ -238,7 +238,7 @@ for (i in seq_along(n_grid)) {
     x_samp <- sample(x_pop, size = n_samp, replace = FALSE)
     xbar <- mean(x_samp)
 
-    relerrs[j] <- 100 * abs(pop_mean_target - ___) / abs(pop_mean_target)
+    relerrs[j] <- 100 * abs(pop_mean_target - xbar) / abs(pop_mean_target)
   }
 
   sim_list[[i]] <- tibble(
@@ -264,10 +264,12 @@ sim_relerr
 # GOAL: Summarize and plot the relationship between n and relative error.
 # TODO: write your own code.
 
-summary_relerr <- ___
+summary_relerr <- sim_relerr%>%
+  group_by(n)%>%
+  summarize(median = median(rel_error_pct), percentile_90 = quantile(rel_error_pct, probs = 0.9) )
 summary_relerr
 
-p_relerr <- ___
+p_relerr <- ggplot(sim_relerr, aes(x = factor(n), y = rel_error_pct)) + geom_boxplot() 
 p_relerr
 ```
 
@@ -298,20 +300,26 @@ Compute:
 set.seed(480)
 
 # TODO: pick a variable and sample size
-target_var <- ___
-n_samp <- ___
-reps <- ___
+target_var <- "fc"
+n_samp <- 1000
+reps <- 200
 
-pop_sd_target <- pop %>% filter(var == target_var) %>% pull(sd)
-pop_mean_target <- pop %>% filter(var == target_var) %>% pull(mean)
+pop_sd_target <- pop %>% 
+  filter(var == target_var) %>% 
+  pull(sd)
+pop_mean_target <- pop %>% 
+  filter(var == target_var) %>% 
+  pull(mean)
 
 means <- replicate(
   reps,
   mean(sample(df[[target_var]], size = n_samp, replace = FALSE), na.rm = TRUE)
 )
 
-se_theory <- ___
-se_sim    <- ___
+se_theory <- summarize(df, se_theory = pop_sd_target / sqrt(1000))%>%
+  pull(se_theory)
+se_sim    <- summarize(df, se_sim = sd(means) / sqrt(1000))%>%
+  pull(se_sim)
 
 tibble(
   target_var = target_var,
@@ -326,7 +334,7 @@ tibble(
 ```{r plot_sampling_dist, echo=TRUE, eval=FALSE}
 tibble(mean_est = means) %>%
   ggplot(aes(x = mean_est)) +
-  geom_histogram(bins = ___, alpha = 0.85) +
+  geom_histogram(bins = 15, alpha = 0.85) +
   geom_vline(xintercept = pop_mean_target, linetype = "dashed", linewidth = 1.1) +
   theme_classic(base_size = 18) +
   labs(
@@ -364,20 +372,21 @@ Write code to:
 set.seed(480)
 
 # TODO: choose settings
-target_var <- ___
-n_samp <- ___
-B <- ___
+target_var <- "fc"
+n_samp <- 500
+B <- 200
 
 # one "field campaign" sample
 samp <- tibble(x = sample(x_pop, size = n_samp, replace = FALSE))
 
 # bootstrap sampling of the mean
 boot_means <- replicate(
-  ___,
-  mean(sample(samp$x, size = ___, replace = TRUE))
+  B,
+  mean(sample(samp$x, size = n_samp, replace = TRUE))
 )
 
-boot_sd <- sd(___)
+boot_sd <- sd(boot_means)
+sample_mean <- mean(samp$x)
 
 tibble(
   sample_mean = mean(samp$x),
@@ -387,7 +396,14 @@ tibble(
 
 ```{r plot_boot, echo=TRUE, eval=FALSE}
 # TODO: plot boot_means and mark the sample mean
-___
+tibble(boot_means)%>%
+ggplot(aes(boot_means)) + geom_histogram(bins = 10, alpha = 0.85) +
+  geom_vline(xintercept = sample_mean, linetype = "dashed", linewidth = 1.1) +
+  theme_classic(base_size = 18) +
+  labs(
+   x = "Boots Means",
+   y = "Count",
+    title = "Boots Means Distribution")
 ```
 
 **Prompt (4–6 sentences):** Compare the bootstrap distribution to the sampling distribution from Part III.  
@@ -438,23 +454,23 @@ tibble(
 ```{r ex1_random_bootstrap, echo=TRUE, eval=FALSE}
 set.seed(480)
 
-n_samp <- ___
+n_samp <- 200
 B <- 4000
 
 # 1) Draw a random sample (no replacement) from the population vector
-swc_samp_random <- sample(___, size = n_samp, replace = FALSE)
+swc_samp_random <- sample(swc_pop, size = n_samp, replace = FALSE)
 
 # 2) Bootstrap the mean (resample WITH replacement from the sample)
 boot_means_random <- replicate(
   B,
-  mean(sample(swc_samp_random, size = ___, replace = TRUE))
+  mean(sample(swc_samp_random, size = n_samp, replace = TRUE))
 )
 
 # 3) Summarize
 tibble(
   pop_mean = pop_mean_swc,
-  sample_mean = mean(___),
-  boot_sd = sd(___)
+  sample_mean = mean(swc_samp_random),
+  boot_sd = sd(boot_means_random)
 )
 ```
 
@@ -463,7 +479,7 @@ tibble(
 
 tibble(boot_mean = boot_means_random) %>%
   ggplot(aes(x = boot_mean)) +
-  geom_histogram(bins = ___, alpha = 0.85) +
+  geom_histogram(bins = 20, alpha = 0.85) +
   geom_vline(xintercept = mean(swc_samp_random), linetype = "dashed", linewidth = 1.1) +
   geom_vline(xintercept = pop_mean_swc, linetype = "solid", linewidth = 1.1) +
   theme_classic(base_size = 18) +
@@ -496,8 +512,8 @@ What does the bootstrap SD represent here?
 # HINT: month(date, label = TRUE, abbr = TRUE)
 
 df_summer <- df %>%
-  filter(___ %in% c("Jun", "Jul", "Aug")) %>%
-  filter(!is.na(___))
+  filter(month %in% c("Jun", "Jul", "Aug")) %>%
+  filter(!is.na(swc))
 
 swc_summer_pool <- df_summer$swc
 
@@ -511,12 +527,12 @@ n_samp <- 200
 B <- 4000
 
 # 1) Draw a summer-only sample
-swc_samp_summer <- sample(___, size = n_samp, replace = FALSE)
+swc_samp_summer <- sample(swc_summer_pool, size = n_samp, replace = FALSE)
 
 # 2) Bootstrap the mean from that sample
-boot_means_summer <- ___(
+boot_means_summer <- replicate(
   B,
-  mean(sample(___, size = n_samp, replace = TRUE))
+  mean(sample(swc_samp_summer, size = n_samp, replace = TRUE))
 )
 
 # 3) Summarize
@@ -533,7 +549,7 @@ tibble(
 
 tibble(boot_mean = boot_means_summer) %>%
   ggplot(aes(x = boot_mean)) +
-  geom_histogram(bins = ___, alpha = 0.85) +
+  geom_histogram(bins = 50, alpha = 0.85) +
   geom_vline(xintercept = mean(swc_samp_summer), linetype = "dashed", linewidth = 1.1) +
   geom_vline(xintercept = pop_mean_swc, linetype = "solid", linewidth = 1.1) +
   theme_classic(base_size = 18) +
@@ -567,9 +583,9 @@ k_per_month <- n_samp / 12
 
 # 1) Create a month-stratified sample from df
 df_strat <- df %>%
-  filter(!is.na(___)) %>%
-  group_by(___) %>%
-  slice_sample(n = ___) %>%
+  filter(!is.na(swc)) %>%
+  group_by(month) %>%
+  slice_sample(n = n_samp) %>%
   ungroup()
 
 swc_samp_strat <- df_strat$swc
@@ -600,7 +616,7 @@ tibble(
 
 tibble(boot_mean = boot_means_strat) %>%
   ggplot(aes(x = boot_mean)) +
-  geom_histogram(bins = ___, alpha = 0.85) +
+  geom_histogram(bins = 50, alpha = 0.85) +
   geom_vline(xintercept = mean(swc_samp_strat), linetype = "dashed", linewidth = 1.1) +
   geom_vline(xintercept = pop_mean_swc, linetype = "solid", linewidth = 1.1) +
   theme_classic(base_size = 18) +
