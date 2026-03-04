@@ -667,7 +667,7 @@ Using the **random SWC sample from earlier**, compute a **95% bootstrap confiden
 ```{r ex1_boot_ci_mean, echo=TRUE, eval=FALSE}
 # GOAL: compute the 2.5% and 97.5% quantiles of the bootstrap distribution
 
-quantile(boot_means_random, probs = c(___, ___))
+quantile(boot_means_random, probs = c(.025, .975))
 ```
 
 **Prompt:**
@@ -675,6 +675,7 @@ quantile(boot_means_random, probs = c(___, ___))
 Does the confidence interval contain the **true population mean (`pop_mean_swc`)**?  
 What does this tell you about the uncertainty of the estimate?
 
+>This confidence interval does contain the true population mean (35.4762). With this large confidence interval being accurate, there is less uncertainty of the estimate. 
 ---
 
 ## Exercise 2 — Visualizing the Confidence Interval
@@ -696,6 +697,7 @@ tibble(boot_mean = boot_means_random) %>%
 
 Explain what the **red vertical lines** represent.
 
+>The red vertical lines represent the 2.5% (left line) and 97.5% (right line) quantiles for this distribution. 
 ---
 
 ## Exercise 3 — Confidence Intervals for a Linear Model
@@ -714,8 +716,8 @@ Examples:
 - `gpp ~ ta`
 
 ```{r ex3_fit_model, echo=TRUE, eval=FALSE}
-response_var <- "___"
-predictor_var <- "___"
+response_var <- "swc"
+predictor_var <- "ta"
 
 model <- lm(df[[response_var]] ~ df[[predictor_var]])
 
@@ -725,13 +727,19 @@ coef(model)
 ### Bootstrap the regression
 
 ```{r ex3_bootstrap_lm, echo=TRUE, eval=FALSE}
+
+slice_df <- df%>%
+  slice_sample(n = 1000, replace = FALSE)
+
 set.seed(480)
 
 B <- 2000
 
+  
 boot_coef <- replicate(B, {
 
-  samp_rows <- df %>% slice_sample(n = nrow(df), replace = TRUE)
+  samp_rows <- slice_df %>% 
+    slice_sample(n = nrow(slice_df), replace = TRUE)
 
   fit <- lm(
     samp_rows[[response_var]] ~ samp_rows[[predictor_var]]
@@ -742,6 +750,7 @@ boot_coef <- replicate(B, {
 })
 
 boot_coef <- t(boot_coef)
+head(boot_coef, 20)
 ```
 
 ### Compute confidence intervals
@@ -758,6 +767,7 @@ Interpret the slope confidence interval.
 - Does it include zero?
 - What does that imply about the relationship between the predictor and response variable?
 
+> The slope of the confidence is negative which generally means a negative relationship between the two variables. The slope does not include zero. This means that as air temperature increases, the soil water content decreases which is reasonable due to evaporation with high temperature. 
 ---
 
 # Submission
