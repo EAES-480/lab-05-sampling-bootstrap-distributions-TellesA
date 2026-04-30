@@ -15,6 +15,8 @@ editor_options:
   chunk_output_type: inline
 ---
 
+> GM GRADE 8.5/10 - Some solid writing on precision vs accuracy and slope interpretation, but some issues code bugs (undefined `x_pop`, broken SE calculations, wrong stratified sample size), and some conceptual misunderstandings (especially around relative error trends and SE).
+
 ```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(lubridate)
@@ -278,6 +280,8 @@ Why does accuracy show “diminishing returns” as n increases?
 
 > The first pattern I notice is as n increases, the median and the 90th percentile decrease. There also seems to be an larger improvement from 300 to 1000 compared to 25 to 100. Accuracy shows "diminishing returns", as the sample size increases because a larger sample has a greater variabiility which can decrease the realtive error. 
 
+> GM: -0.25 Good to notice those trends. Important to understand that as sample size increases it eventually becomes representative of the population, meaning further sample size increases have "diminishing returns" on uncertainty reduction.
+
 ---
 
 # Standard error and sampling distributions
@@ -350,6 +354,8 @@ What changes if you increase `n_samp` vs increase `reps`?
 
 > The se_theory (.26) and se_simulated (.0082) at n = 1000, were not very close to one another. When I increased n_samp, the se_theory and se_simulated values were even farther away than before. After increasing the reps, the se_theory and se_simulated were about the same as the first time. 
 
+> GM: -0.5 Some issues here in the SE code (incorrect use of `summarize` on `df` and wrong scaling). Increasing `n_samp` reduces SE; increasing `reps` improves the reliability of the simulated SE estimate. The se_theory and se_simulated should be very similar.
+
 ---
 
 # Bootstrap intuition (one sample, many resamples)
@@ -410,6 +416,8 @@ ggplot(aes(boot_means)) + geom_histogram(bins = 10, alpha = 0.85) +
 What is the bootstrap trying to approximate? When is bootstrap especially useful in EAES?
 
 > When comparing the bootstrap and sampling distribution are both relatively normal distributions. However the bootstrap seems to have a slight left skew commpared to the sampling distribution. The bootstrap is trying to approximate the true sampling distribution of the sample taken from the CO2 flux data. Bootstrapping is especially useful in EaES because most of the time you only have one study available, therefore bootstrapping can help simulate the distribution with limited information. 
+
+> GM: -0.25 Bootstrap approximates the sampling distribution of the **population statistic** (here the mean) from one observed sample. Very useful in EAES when repeated field campaigns are not feasible.
 
 ---
 
@@ -495,6 +503,8 @@ tibble(boot_mean = boot_means_random) %>%
 What does the bootstrap SD represent here?
 
 > The bootstrap distribution is not directly centered on the population mean, but it is slightly to the right of it centered more on the sample mean. THe bootstrap SD represents the level of uncertainty of the population mean based on the bootstrap sampling and mean. 
+
+> GM: -0.25 The bootstrap distribution centers on the sample mean (dashed line), not the population mean. The bootstrap SD estimates the standard error / uncertainty of the sample mean.
 
 ---
 
@@ -634,6 +644,8 @@ What does this teach you about bootstrap and study design?
 
 > The random and stratified distributions were the most similar in their center and spread compared to the summer-only distribution. These two were centered around the same value but the stratified distribution had more spread compared to the random distribution. The summer-only distribution was very narrow with a small spread and a lower sample mean, ultimately shifting the center more left. The most accurate sampling design was the stratified design because it was the closest to the population mean. I would also say that this design is also looks the most precise when comparing its shape to the original sampling distribution. This has taught me that just as with sampling, the design can make a distribution more accurate if chosen correctly based on the known information. 
 
+> GM: -0.25 Good overall comparison, but note that stratified sampling produced a more accurate center while maintaining good precision. BUT the most precise officially was the summer-only, however, you can have a precise answer without it being accurate (close to the truth).
+
 ---
 
 # Part II wrap-up
@@ -768,6 +780,9 @@ Interpret the slope confidence interval.
 - What does that imply about the relationship between the predictor and response variable?
 
 > The slope of the confidence is negative which generally means a negative relationship between the two variables. The slope does not include zero. This means that as air temperature increases, the soil water content decreases which is reasonable due to evaporation with high temperature. 
+
+> GM: and "the slope is therefore statistically significant"
+
 ---
 
 # Submission
